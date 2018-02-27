@@ -3,3 +3,12 @@
 *.vpi
 *.vvp
 *.vcd
+.restartSimSession.tcl.old
+DVEfiles/
+compile.log
+csrc/
+inter.vpd
+session.inter.vpd.tcl
+simv
+simv.daidir/
+ucli.key
