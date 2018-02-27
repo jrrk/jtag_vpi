@@ -30,6 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#define VCS_VPI
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
