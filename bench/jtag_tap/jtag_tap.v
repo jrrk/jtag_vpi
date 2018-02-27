@@ -120,16 +120,20 @@ module jtag_tap( // renamed by julius
                 // Select signals for boundary scan or mbist
                 extest_select_o, 
                 sample_preload_select_o,
-                mbist_select_o,
-                debug_select_o,
+                user1_select_o,
+                user2_select_o,
+                user3_select_o,
+                user4_select_o,
                 
                 // TDO signal that is connected to TDI of sub-modules.
                 tdo_o, 
                 
                 // TDI signals from sub-modules
-                debug_tdi_i,    // from debug module
-                bs_chain_tdi_i, // from Boundary Scan Chain
-                mbist_tdi_i     // from Mbist Chain
+                user1_tdi_i,    // from user chain 1
+                user2_tdi_i,    // from user chain 1
+                user3_tdi_i,    // from user chain 1
+                user4_tdi_i,    // from user chain 1
+                bs_chain_tdi_i  // from Boundary Scan Chain
               );
 
 
@@ -150,16 +154,20 @@ output  capture_dr_o;
 // Select signals for boundary scan or mbist
 output  extest_select_o;
 output  sample_preload_select_o;
-output  mbist_select_o;
-output  debug_select_o;
+output  user1_select_o;
+output  user2_select_o;
+output  user3_select_o;
+output  user4_select_o;
 
 // TDO signal that is connected to TDI of sub-modules.
 output  tdo_o;
 
 // TDI signals from sub-modules
-input   debug_tdi_i;    // from debug module
+input   user1_tdi_i;    // from user chain 1
+input   user2_tdi_i;    // from user chain 2
+input   user3_tdi_i;    // from user chain 3
+input   user4_tdi_i;    // from user chain 4
 input   bs_chain_tdi_i; // from Boundary Scan Chain
-input   mbist_tdi_i;    // from Mbist Chain
 
 // Registers
 reg     test_logic_reset;
@@ -180,9 +188,12 @@ reg     exit2_ir;
 reg     update_ir;
 reg     extest_select;
 reg     sample_preload_select;
+reg     user1_select;
+reg     user2_select;
+reg     user3_select;
+reg     user4_select;
+reg     usercode_select;
 reg     idcode_select;
-reg     mbist_select;
-reg     debug_select;
 reg     bypass_select;
 reg     tdo_pad_o;
 reg     tdo_padoe_o;
@@ -197,8 +208,10 @@ assign capture_dr_o = capture_dr;
 
 assign extest_select_o = extest_select;
 assign sample_preload_select_o = sample_preload_select;
-assign mbist_select_o = mbist_select;
-assign debug_select_o = debug_select;
+assign user1_select_o = user1_select;
+assign user2_select_o = user2_select;
+assign user3_select_o = user3_select;
+assign user4_select_o = user4_select;
 
 
 always @ (posedge tck_pad_i)
@@ -566,17 +579,23 @@ always @ (latched_jtag_ir)
 begin
   extest_select           = 1'b0;
   sample_preload_select   = 1'b0;
+  user1_select            = 1'b0;
+  user2_select            = 1'b0;
+  user3_select            = 1'b0;
+  user4_select            = 1'b0;
+  usercode_select         = 1'b0;
   idcode_select           = 1'b0;
-  mbist_select            = 1'b0;
-  debug_select            = 1'b0;
   bypass_select           = 1'b0;
 
   case(latched_jtag_ir)    /* synthesis parallel_case */ 
     `EXTEST:            extest_select           = 1'b1;    // External test
     `SAMPLE_PRELOAD:    sample_preload_select   = 1'b1;    // Sample preload
+    `USER1:             user1_select            = 1'b1;    // User chain 1
+    `USER2:             user2_select            = 1'b1;    // User chain 2
+    `USER3:             user3_select            = 1'b1;    // User chain 3
+    `USER4:             user4_select            = 1'b1;    // User chain 4
+    `USERCODE:          usercode_select         = 1'b1;    // User Code
     `IDCODE:            idcode_select           = 1'b1;    // ID Code
-    `MBIST:             mbist_select            = 1'b1;    // Mbist test
-    `DEBUG:             debug_select            = 1'b1;    // Debug
     `BYPASS:            bypass_select           = 1'b1;    // BYPASS
     default:            bypass_select           = 1'b1;    // BYPASS
   endcase
@@ -590,7 +609,7 @@ end
 *                                                                                 *
 **********************************************************************************/
 always @ (shift_ir_neg or exit1_ir or instruction_tdo or latched_jtag_ir_neg or idcode_tdo or
-          debug_tdi_i or bs_chain_tdi_i or mbist_tdi_i or 
+          user1_tdi_i or user2_tdi_i or user3_tdi_i or user4_tdi_i or bs_chain_tdi_i or 
           bypassed_tdo)
 begin
   if(shift_ir_neg)
@@ -598,11 +617,13 @@ begin
   else
     begin
       case(latched_jtag_ir_neg)    // synthesis parallel_case
-        `IDCODE:            tdo_pad_o = idcode_tdo;       // Reading ID code
-        `DEBUG:             tdo_pad_o = debug_tdi_i;      // Debug
-        `SAMPLE_PRELOAD:    tdo_pad_o = bs_chain_tdi_i;   // Sampling/Preloading
         `EXTEST:            tdo_pad_o = bs_chain_tdi_i;   // External test
-        `MBIST:             tdo_pad_o = mbist_tdi_i;      // Mbist test
+        `SAMPLE_PRELOAD:    tdo_pad_o = bs_chain_tdi_i;   // Sampling/Preloading
+        `USER1:             tdo_pad_o = user1_tdi_i;      // Reading user code 1
+        `USER2:             tdo_pad_o = user2_tdi_i;      // Reading user code 2
+        `USER3:             tdo_pad_o = user3_tdi_i;      // Reading user code 3
+        `USER4:             tdo_pad_o = user4_tdi_i;      // Reading user code 4
+        `IDCODE:            tdo_pad_o = idcode_tdo;       // Reading ID code
         default:            tdo_pad_o = bypassed_tdo;     // BYPASS instruction
       endcase
     end
@@ -612,7 +633,7 @@ end
 // Tristate control for tdo_pad_o pin
 always @ (negedge tck_pad_i)
 begin
-  tdo_padoe_o <=  shift_ir | shift_dr | (pause_dr & debug_select);
+  tdo_padoe_o <=  shift_ir | shift_dr | pause_dr;
 end
 /**********************************************************************************
 *                                                                                 *

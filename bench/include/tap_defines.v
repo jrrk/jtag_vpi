@@ -54,16 +54,19 @@
 
 
 // Define IDCODE Value
-`define IDCODE_VALUE  32'h14951185
+`define IDCODE_VALUE  32'h13631093
 
 // Length of the Instruction register
-`define	IR_LENGTH	4
+`define	IR_LENGTH	6
 
 // Supported Instructions
-`define EXTEST          4'b0000
-`define SAMPLE_PRELOAD  4'b0001
-`define IDCODE          4'b0010
-`define DEBUG           4'b1000
-`define MBIST           4'b1001
-`define BYPASS          4'b1111
+`define EXTEST          6'b100110
+`define SAMPLE_PRELOAD  6'b000001
+`define USER1           6'b000010
+`define USER2           6'b000011
+`define USER3           6'b100010
+`define USER4           6'b100011
+`define USERCODE        6'b001000
+`define IDCODE          6'b001001
+`define BYPASS          6'b111111
 

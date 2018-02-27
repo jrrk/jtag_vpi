@@ -77,16 +77,6 @@ begin
 	data_out	<= 32'h0;
 	data_in		<= 32'h0;
 
-	// Insert a #delay here because we need to
-	// wait until the PC isn't pointing to flash anymore
-	// (this is around 20k ns if the flash_crash boot code
-	// is being booted from, else much bigger, around 10mil ns)
-	wait(init_done)
-		if($test$plusargs("jtag_vpi_enable")) main;
-end
-
-task main;
-begin
 	$display("JTAG debug module with VPI interface enabled\n");
 
 	reset_tap;
@@ -159,9 +149,6 @@ begin
 
 	end // while (1)
 end
-
-endtask // main
-
 
 // Generation of the TCK signal
 task gen_clk;
